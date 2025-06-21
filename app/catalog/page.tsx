@@ -64,7 +64,7 @@ interface Car {
   users?: {
     full_name: string
     avatar_url?: string
-  }
+  } | null
 }
 
 export default function CatalogPage() {
@@ -101,20 +101,47 @@ export default function CatalogPage() {
   const fetchCars = async () => {
     setLoading(true)
     try {
-      const { data, error } = await supabase
+      // --- старый фрагмент (удалить) ---
+      // const { data, error } = await supabase
+      //   .from("cars")
+      //   .select(`
+      //     *,
+      //     users:owner_id (
+      //       full_name,
+      //       avatar_url
+      //     )
+      //   `)
+      //   .eq("available", true)
+      //   .order("created_at", { ascending: false })
+
+      // --- новый фрагмент (добавить) ---
+      const { data: carRows, error } = await supabase
         .from("cars")
-        .select(`
-          *,
-          users:owner_id (
-            full_name,
-            avatar_url
-          )
-        `)
+        .select("*") // берём только данные из cars
         .eq("available", true)
         .order("created_at", { ascending: false })
 
       if (error) throw error
-      setCars(data || [])
+
+      // подтягиваем владельцев вторым запросом, чтобы не ломать RLS
+      const ownerIds = [...new Set(carRows.map((c) => c.owner_id).filter(Boolean))]
+      const owners: Record<string, { full_name: string; avatar_url?: string }> = {}
+
+      if (ownerIds.length) {
+        const { data: ownerRows } = await supabase.from("users").select("id, full_name, avatar_url").in("id", ownerIds)
+
+        ownerRows?.forEach((u) => {
+          owners[u.id as string] = { full_name: u.full_name, avatar_url: u.avatar_url ?? undefined }
+        })
+      }
+
+      // объединяем данные в один массив с полем users
+      setCars(
+        carRows.map((c) => ({
+          ...c,
+          users: owners[c.owner_id as string] ?? null,
+        })) as any,
+      )
     } catch (error) {
       console.error("Error fetching cars:", error)
     } finally {

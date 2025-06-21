@@ -12,13 +12,7 @@ export async function getAvailableCars() {
 
   const { data, error } = await supabase
     .from("cars")
-    .select(`
-      *,
-      users:owner_id (
-        full_name,
-        avatar_url
-      )
-    `)
+    .select("*")
     .eq("available", true)
     .order("created_at", { ascending: false })
 
@@ -27,32 +21,41 @@ export async function getAvailableCars() {
     return []
   }
 
-  return data
+  const ownerIds = [...new Set(data!.map((c) => c.owner_id).filter(Boolean))]
+  const owners: Record<string, { full_name: string; avatar_url?: string }> = {}
+
+  if (ownerIds.length) {
+    const { data: ownerRows } = await supabase.from("users").select("id, full_name, avatar_url").in("id", ownerIds)
+
+    ownerRows?.forEach((u) => {
+      owners[u.id as string] = { full_name: u.full_name, avatar_url: u.avatar_url ?? undefined }
+    })
+  }
+
+  return data!.map((c) => ({
+    ...c,
+    users: owners[c.owner_id as string] ?? null,
+  })) as any
 }
 
 // Получение автомобиля по ID
 export async function getCarById(id: string) {
   const supabase = createClient()
 
-  const { data, error } = await supabase
-    .from("cars")
-    .select(`
-      *,
-      users:owner_id (
-        full_name,
-        phone,
-        avatar_url
-      )
-    `)
-    .eq("id", id)
-    .single()
+  const { data, error } = await supabase.from("cars").select("*").eq("id", id).single()
 
   if (error) {
     console.error("Error fetching car:", error)
     return null
   }
 
-  return data
+  const { data: owner } = await supabase
+    .from("users")
+    .select("id, full_name, phone, avatar_url")
+    .eq("id", data!.owner_id)
+    .single()
+
+  return { ...data, users: owner ?? null } as any
 }
 
 // Создание нового автомобиля

@@ -58,7 +58,8 @@ export async function POST(req: NextRequest) {
         maxTokens: 500,
       })
 
-      return result.toAIStreamResponse()
+      // Convert the text stream into a proper NextResponse/Response
+      return result.toDataStreamResponse()
     } catch (aiError) {
       console.error("Groq AI SDK error:", aiError)
 
