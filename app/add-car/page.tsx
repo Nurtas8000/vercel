@@ -89,9 +89,13 @@ export default function AddCarPage() {
     fuelType: "gasoline",
     transmission: "automatic",
     engineVolume: "",
+    numberOfPayments: "24",
   })
 
   const handleInputChange = (field: string, value: string | number) => {
+    if (field === "numberOfPayments") {
+      value = Number.parseInt(value as string)
+    }
     setFormData((prev) => ({ ...prev, [field]: value }))
   }
 
@@ -158,6 +162,7 @@ export default function AddCarPage() {
         fuel_type: formData.fuelType,
         transmission: formData.transmission,
         engine_volume: formData.engineVolume ? Number.parseFloat(formData.engineVolume) : null,
+        number_of_payments: Number.parseInt(formData.numberOfPayments),
       }
 
       const { data, error } = await supabase.from("cars").insert(carData).select().single()
@@ -448,26 +453,23 @@ export default function AddCarPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="rentalPeriodMonths">Срок аренды (месяцев) *</Label>
-                <Select
-                  value={formData.rentalPeriodMonths}
-                  onValueChange={(value) => handleInputChange("rentalPeriodMonths", value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="12">12 месяцев</SelectItem>
-                    <SelectItem value="18">18 месяцев</SelectItem>
-                    <SelectItem value="24">24 месяца</SelectItem>
-                    <SelectItem value="36">36 месяцев</SelectItem>
-                    <SelectItem value="48">48 месяцев</SelectItem>
-                  </SelectContent>
-                </Select>
+                <Label htmlFor="numberOfPayments">Количество платежей *</Label>
+                <Input
+                  id="numberOfPayments"
+                  type="number"
+                  value={formData.numberOfPayments}
+                  onChange={(e) => handleInputChange("numberOfPayments", e.target.value)}
+                  placeholder="Например: 24"
+                  required
+                  min="1"
+                />
+                <p className="text-sm text-gray-500">
+                  Общее количество регулярных платежей по выбранной периодичности.
+                </p>
               </div>
 
               {/* Расчет общей стоимости */}
-              {formData.rentalPrice && formData.rentalPeriodMonths && (
+              {formData.rentalPrice && formData.numberOfPayments && (
                 <div className="bg-blue-50 p-4 rounded-lg">
                   <h4 className="font-medium text-blue-800 mb-2">Расчет стоимости:</h4>
                   <div className="space-y-1 text-sm">
@@ -476,14 +478,14 @@ export default function AddCarPage() {
                       <span className="font-bold">{Number.parseInt(formData.rentalPrice).toLocaleString()}₸</span>
                     </div>
                     <div className="flex justify-between">
-                      <span>Срок аренды:</span>
-                      <span>{formData.rentalPeriodMonths} месяцев</span>
+                      <span>Количество платежей:</span>
+                      <span>{formData.numberOfPayments}</span>
                     </div>
                     <div className="flex justify-between border-t pt-1">
                       <span>Общая сумма платежей:</span>
                       <span className="font-bold text-blue-600">
                         {(
-                          Number.parseInt(formData.rentalPrice) * Number.parseInt(formData.rentalPeriodMonths)
+                          Number.parseFloat(formData.rentalPrice) * Number.parseInt(formData.numberOfPayments)
                         ).toLocaleString()}
                         ₸
                       </span>
@@ -596,7 +598,14 @@ export default function AddCarPage() {
             </Button>
             <Button
               type="submit"
-              disabled={loading || !formData.brand || !formData.model || !formData.rentalPrice || !formData.location}
+              disabled={
+                loading ||
+                !formData.brand ||
+                !formData.model ||
+                !formData.rentalPrice ||
+                !formData.location ||
+                !formData.numberOfPayments
+              }
               className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
             >
               {loading ? (

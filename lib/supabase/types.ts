@@ -51,7 +51,7 @@ export interface Database {
           license_plate: string | null
           photos: any
           rental_price: number
-          rental_period_months: number
+          number_of_payments: number
           payment_frequency: "daily" | "six_times_week" | "weekly" | "monthly"
           available: boolean
           description: string | null
@@ -71,7 +71,7 @@ export interface Database {
           license_plate?: string | null
           photos?: any
           rental_price: number
-          rental_period_months: number
+          number_of_payments: number
           payment_frequency?: "daily" | "six_times_week" | "weekly" | "monthly"
           available?: boolean
           description?: string | null
@@ -91,7 +91,7 @@ export interface Database {
           license_plate?: string | null
           photos?: any
           rental_price?: number
-          rental_period_months?: number
+          number_of_payments?: number
           payment_frequency?: "daily" | "six_times_week" | "weekly" | "monthly"
           available?: boolean
           description?: string | null

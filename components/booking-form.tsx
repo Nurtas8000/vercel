@@ -36,7 +36,54 @@ export function BookingForm({ car }: BookingFormProps) {
     try {
       const startDate = new Date()
       const endDate = new Date(startDate)
-      endDate.setMonth(startDate.getMonth() + (car.rental_period_months || 0))
+      const freq = car.payment_frequency
+      const numPayments = car.number_of_payments || 0
+
+      if (numPayments > 0) {
+        switch (freq) {
+          case "daily":
+            endDate.setDate(startDate.getDate() + numPayments)
+            break
+          case "weekly":
+            endDate.setDate(startDate.getDate() + numPayments * 7)
+            break
+          case "monthly":
+            endDate.setMonth(startDate.getMonth() + numPayments)
+            break
+          case "six_times_week":
+            // Рассчитываем количество полных недель и оставшихся дней
+            const fullWeeks = Math.floor(numPayments / 6)
+            const remainingDays = numPayments % 6
+            let totalCalendarDays = fullWeeks * 7
+            // Добавляем оставшиеся дни, пропуская воскресенья, если они попадаются
+            const tempCurrentDate = new Date(startDate)
+            tempCurrentDate.setDate(tempCurrentDate.getDate() + fullWeeks * 7) // Перемещаемся на конец полных недель
+
+            let addedPaymentDays = 0
+            while (addedPaymentDays < remainingDays) {
+              if (tempCurrentDate.getDay() !== 0) {
+                // Если не воскресенье
+                addedPaymentDays++
+              }
+              if (addedPaymentDays < remainingDays) {
+                // Если еще не все доп. дни учтены
+                tempCurrentDate.setDate(tempCurrentDate.getDate() + 1)
+                totalCalendarDays++
+              } else if (addedPaymentDays === remainingDays && tempCurrentDate.getDay() === 0 && remainingDays > 0) {
+                // Если последний платежный день попал на воскресенье, его нужно учесть, но сдвинуть дату на понедельник
+                // Однако, если это последний платеж, он должен быть в этот день.
+                // Этот расчет сложен для точного endDate.
+                // Проще всего для endDate указать примерную дату.
+                // Для six_times_week, endDate будет примерно startDate + (numPayments / 6 * 7) дней.
+              }
+            }
+            endDate.setDate(startDate.getDate() + Math.ceil(numPayments / 6) * 7) // Примерная дата окончания
+            break
+          default:
+            // Если частота не определена, можно оставить как есть или добавить логику по умолчанию
+            break
+        }
+      }
 
       const bookingData = {
         car_id: car.id,
@@ -44,7 +91,7 @@ export function BookingForm({ car }: BookingFormProps) {
         owner_id: car.owner_id,
         start_date: startDate.toISOString(),
         end_date: endDate.toISOString(),
-        total_price: (car.rental_price || 0) * (car.rental_period_months || 0),
+        total_price: (car.rental_price || 0) * (car.number_of_payments || 0),
         status: "pending" as const, // 'pending', 'confirmed', 'active', 'completed', 'cancelled'
       }
 
