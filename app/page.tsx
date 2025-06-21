@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Car, CreditCard, CheckCircle, Shield, Play, Award, Globe } from "lucide-react"
+import { Car, CreditCard, CheckCircle, Shield, Award, Globe } from "lucide-react"
 import Link from "next/link"
 import { AIChatSupport } from "@/components/ai-chat-support"
 import { AuthHeader } from "@/components/auth-header"
@@ -31,12 +31,7 @@ export default function HomePage() {
             <Link href="/catalog" className="text-gray-700 hover:text-blue-600 transition-colors font-medium">
               Каталог
             </Link>
-            <Link
-              href="/payment-calculator"
-              className="text-gray-700 hover:text-purple-600 transition-colors font-medium"
-            >
-              Калькулятор
-            </Link>
+            {/* Ссылка на калькулятор удалена */}
             <Link href="#how-it-works" className="text-gray-700 hover:text-green-600 transition-colors font-medium">
               Как работает
             </Link>
@@ -130,16 +125,16 @@ export default function HomePage() {
             </Card>
           </div>
 
-          {/* Interactive Demo */}
+          {/* Interactive Demo - блок с кнопкой на калькулятор удален */}
           <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-8 text-white text-center">
-            <h3 className="text-2xl font-bold mb-4">Попробуйте калькулятор платежей</h3>
+            <h3 className="text-2xl font-bold mb-4">Прозрачные условия для каждого</h3>
             <p className="text-blue-100 mb-6 max-w-2xl mx-auto">
-              Рассчитайте точную стоимость аренды с выкупом для любого автомобиля
+              Узнайте подробности об аренде с выкупом и выберите свой автомобиль уже сегодня!
             </p>
-            <Link href="/payment-calculator">
+            <Link href="/catalog">
               <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-100 shadow-lg hover:shadow-xl">
-                <Play className="w-5 h-5 mr-2" />
-                Открыть калькулятор
+                <Car className="w-5 h-5 mr-2" />
+                Перейти в каталог
               </Button>
             </Link>
           </div>
@@ -195,11 +190,7 @@ export default function HomePage() {
                     Каталог автомобилей
                   </Link>
                 </li>
-                <li>
-                  <Link href="/payment-calculator" className="hover:text-white transition-colors">
-                    Калькулятор платежей
-                  </Link>
-                </li>
+                {/* Ссылка на калькулятор удалена */}
                 <li>
                   <Link href="#how-it-works" className="hover:text-white transition-colors">
                     Как работает
