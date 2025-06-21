@@ -1,3 +1,6 @@
+// 🚫 Do NOT prerender at build-time – we need request cookies for Supabase
+export const dynamic = "force-dynamic"
+
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
