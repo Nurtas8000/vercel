@@ -76,3 +76,5 @@ export default function LoginForm() {
     </form>
   )
 }
+
+export { LoginForm }

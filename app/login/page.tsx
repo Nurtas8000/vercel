@@ -1,17 +1,12 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { useAuth } from "@/lib/auth/auth-context"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Car, Eye, EyeOff, Loader2, AlertCircle } from "lucide-react"
+import { LoginForm } from "@/components/auth/login-form" // Предполагаем, что у вас есть такой компонент
+import { GoogleSignInButton } from "@/components/auth/google-sign-in-button"
 
 export default function LoginPage() {
   const [email, setEmail] = useState("")
@@ -42,113 +37,33 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-100 via-purple-50 to-pink-100 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        {/* Logo */}
-        <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center space-x-2">
-            <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
-              <Car className="w-7 h-7 text-white" />
-            </div>
-            <span className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              BnAuto
-            </span>
-          </Link>
+    <div className="flex min-h-screen flex-col items-center justify-center bg-gray-100 dark:bg-gray-900">
+      <div className="w-full max-w-md space-y-8 rounded-lg bg-white p-8 shadow-lg dark:bg-gray-800">
+        <div>
+          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
+            Войдите в свой аккаунт
+          </h2>
         </div>
-
-        <Card className="shadow-2xl border-0 bg-white/90 backdrop-blur-md">
-          <CardHeader className="text-center">
-            <CardTitle className="text-2xl font-bold">Вход в аккаунт</CardTitle>
-            <p className="text-gray-600">Войдите в свой аккаунт BnAuto</p>
-          </CardHeader>
-
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {error && (
-                <Alert className="border-red-200 bg-red-50">
-                  <AlertCircle className="h-4 w-4 text-red-600" />
-                  <AlertDescription className="text-red-600">{error}</AlertDescription>
-                </Alert>
-              )}
-
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="your@email.com"
-                  required
-                  className="h-12"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="password">Пароль</Label>
-                <div className="relative">
-                  <Input
-                    id="password"
-                    type={showPassword ? "text" : "password"}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Введите пароль"
-                    required
-                    className="h-12 pr-12"
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="absolute right-0 top-0 h-12 px-3 hover:bg-transparent"
-                    onClick={() => setShowPassword(!showPassword)}
-                  >
-                    {showPassword ? (
-                      <EyeOff className="h-4 w-4 text-gray-400" />
-                    ) : (
-                      <Eye className="h-4 w-4 text-gray-400" />
-                    )}
-                  </Button>
-                </div>
-              </div>
-
-              <Button
-                type="submit"
-                className="w-full h-12 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
-                disabled={loading}
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Вход...
-                  </>
-                ) : (
-                  "Войти"
-                )}
-              </Button>
-
-              <div className="text-center">
-                <Link href="/forgot-password" className="text-sm text-blue-600 hover:text-blue-700">
-                  Забыли пароль?
-                </Link>
-              </div>
-            </form>
-
-            <div className="mt-6 pt-6 border-t text-center">
-              <p className="text-gray-600">
-                Нет аккаунта?{" "}
-                <Link href="/register" className="text-blue-600 hover:text-blue-700 font-medium">
-                  Зарегистрироваться
-                </Link>
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-
-        <div className="text-center mt-6">
-          <Link href="/" className="text-gray-600 hover:text-gray-700 text-sm">
-            ← Вернуться на главную
-          </Link>
+        <LoginForm />
+        <div className="relative my-6">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-gray-300 dark:border-gray-600" />
+          </div>
+          <div className="relative flex justify-center text-sm">
+            <span className="bg-white px-2 text-gray-500 dark:bg-gray-800 dark:text-gray-400">Или продолжите с</span>
+          </div>
+        </div>
+        <GoogleSignInButton />
+        <div className="mt-6 text-center text-sm">
+          <p className="text-gray-600 dark:text-gray-400">
+            Нет аккаунта?{" "}
+            <Link
+              href="/signup"
+              className="font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
+            >
+              Зарегистрироваться
+            </Link>
+          </p>
         </div>
       </div>
     </div>

@@ -19,6 +19,7 @@ interface AuthContextType {
   ) => Promise<{ error: any }>
   signOut: () => Promise<void>
   updateProfile: (data: any) => Promise<{ error: any }>
+  signInWithGoogle: () => Promise<{ error: any }>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -101,6 +102,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return { error }
   }
 
+  const signInWithGoogle = async () => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`, // Или ваш основной URL после входа
+      },
+    })
+    return { error }
+  }
+
   return (
     <AuthContext.Provider
       value={{
@@ -110,6 +121,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         signUp,
         signOut,
         updateProfile,
+        signInWithGoogle,
       }}
     >
       {children}
