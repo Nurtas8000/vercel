@@ -1,15 +1,18 @@
 import type { NextRequest } from "next/server"
+import { groq } from "@ai-sdk/groq" // Импортируем Groq
+import { streamText, type CoreMessage } from "ai"
 
-// Fallback если нет AI SDK
+// Fallback если нет AI SDK или ключа
 export async function POST(req: NextRequest) {
   try {
-    const { messages } = await req.json()
+    const { messages }: { messages: CoreMessage[] } = await req.json()
 
-    // Проверяем наличие OpenAI API ключа
-    if (!process.env.OPENAI_API_KEY) {
+    // Проверяем наличие Groq API ключа
+    if (!process.env.GROQ_API_KEY) {
+      console.warn("GROQ_API_KEY is not set. Chatbot will use fallback responses.")
       return new Response(
         JSON.stringify({
-          error: "OpenAI API key не настроен. Добавьте OPENAI_API_KEY в environment variables.",
+          error: "Groq API key не настроен. Добавьте GROQ_API_KEY в environment variables.",
         }),
         {
           status: 500,
@@ -18,13 +21,11 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // Пытаемся использовать AI SDK
+    // Пытаемся использовать AI SDK с Groq
     try {
-      const { openai } = await import("@ai-sdk/openai")
-      const { streamText } = await import("ai")
-
       const result = await streamText({
-        model: openai("gpt-4o"),
+        model: groq("llama3-8b-8192"), // Используем модель Llama 3 (8B) через Groq. Вы можете выбрать другую доступную модель.
+        // model: openai("gpt-3.5-turbo"), // Это было для OpenAI
         system: `Ты AI помощник платформы BnAuto - сервиса аренды автомобилей с правом выкупа в Казахстане.
 
 КЛЮЧЕВАЯ ИНФОРМАЦИЯ О BNAUTO:
@@ -59,27 +60,26 @@ export async function POST(req: NextRequest) {
 
       return result.toAIStreamResponse()
     } catch (aiError) {
-      console.error("AI SDK error:", aiError)
+      console.error("Groq AI SDK error:", aiError)
 
-      // Fallback ответы без AI
-      const lastMessage = messages[messages.length - 1]?.content?.toLowerCase() || ""
+      // Fallback ответы без AI (остаются такими же)
+      const lastMessageContent = messages[messages.length - 1]?.content?.toString().toLowerCase() || ""
+      let responseText = "Извините, AI временно недоступен. "
 
-      let response = "Извините, AI временно недоступен. "
-
-      if (lastMessage.includes("выкуп") || lastMessage.includes("1")) {
-        response += "Но могу сказать: после оплаты всех арендных платежей автомобиль становится вашим за 1₸! 🚗"
-      } else if (lastMessage.includes("документ")) {
-        response += "Для аренды нужны: паспорт, водительские права и подтверждение дохода. 📄"
-      } else if (lastMessage.includes("город")) {
-        response += "Мы работаем в Алматы, Астане и Шымкенте! 🏙️"
-      } else if (lastMessage.includes("оплат")) {
-        response += "Оплата через Kaspi Pay: ежедневно, еженедельно или ежемесячно. 💳"
+      if (lastMessageContent.includes("выкуп") || lastMessageContent.includes("1")) {
+        responseText += "Но могу сказать: после оплаты всех арендных платежей автомобиль становится вашим за 1₸! 🚗"
+      } else if (lastMessageContent.includes("документ")) {
+        responseText += "Для аренды нужны: паспорт, водительские права и подтверждение дохода. 📄"
+      } else if (lastMessageContent.includes("город")) {
+        responseText += "Мы работаем в Алматы, Астане и Шымкенте! 🏙️"
+      } else if (lastMessageContent.includes("оплат")) {
+        responseText += "Оплата через Kaspi Pay: ежедневно, еженедельно или ежемесячно. 💳"
       } else {
-        response += "Свяжитесь с нашей поддержкой для получения подробной информации! 📞"
+        responseText += "Свяжитесь с нашей поддержкой для получения подробной информации! 📞"
       }
-
-      return new Response(response, {
-        headers: { "Content-Type": "text/plain" },
+      return new Response(responseText, {
+        status: 200,
+        headers: { "Content-Type": "text/plain; charset=utf-8" },
       })
     }
   } catch (error) {

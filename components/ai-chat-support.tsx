@@ -1,7 +1,5 @@
 "use client"
 
-import type React from "react"
-
 import { useState } from "react"
 import { useChat } from "ai/react"
 import { Button } from "@/components/ui/button"
@@ -13,7 +11,7 @@ import { MessageCircle, X, Send, Bot, User, Loader2, AlertCircle } from "lucide-
 export function AIChatSupport() {
   const [isOpen, setIsOpen] = useState(false)
 
-  const { messages, input, handleInputChange, handleSubmit, isLoading, error } = useChat({
+  const { messages, input, handleInputChange, handleSubmit, isLoading, error, append } = useChat({
     api: "/api/chat",
     initialMessages: [
       {
@@ -37,23 +35,9 @@ export function AIChatSupport() {
   ]
 
   const handleQuickQuestion = (question: string) => {
-    // Создаем синтетическое событие для отправки быстрого вопроса
-    const syntheticEvent = {
-      preventDefault: () => {},
-    } as React.FormEvent<HTMLFormElement>
-
-    // Устанавливаем значение input
-    const inputElement = document.querySelector('input[placeholder="Напишите ваш вопрос..."]') as HTMLInputElement
-    if (inputElement) {
-      inputElement.value = question
-      // Создаем событие изменения
-      const changeEvent = new Event("input", { bubbles: true })
-      inputElement.dispatchEvent(changeEvent)
-    }
-
-    // Отправляем форму
-    handleSubmit(syntheticEvent, {
-      data: { message: question },
+    append({
+      content: question,
+      role: "user",
     })
   }
 
