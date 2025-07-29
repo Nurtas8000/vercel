@@ -1,32 +1,26 @@
 import type React from "react"
 import type { Metadata } from "next"
-import "./globals.css"
-import { AuthProvider } from "@/lib/auth/auth-context"
-import { ThemeProvider } from "@/components/theme-provider"
 import { Inter } from "next/font/google"
+import "./globals.css"
 
-const inter = Inter({ subsets: ["latin"] })
+const inter = Inter({ subsets: ["latin", "cyrillic"] })
 
 export const metadata: Metadata = {
-  title: "v0 App",
-  description: "Created with v0",
-  generator: "v0.dev",
+  title: "BN Lease - Долгосрочная аренда автомобилей в Казахстане",
+  description:
+    "Лизинг корейских и китайских автомобилей с правом выкупа. Минимальный взнос от 15%. Быстрое оформление за 24 часа.",
+  keywords: "лизинг автомобилей, аренда авто, Казахстан, корейские автомобили, китайские автомобили, BN Lease",
+    generator: 'v0.dev'
 }
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode
-}>) {
+}) {
   return (
-    <html lang="en">
-      <body className={inter.className}>
-        <AuthProvider>
-          <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-            {children}
-          </ThemeProvider>
-        </AuthProvider>
-      </body>
+    <html lang="ru">
+      <body className={inter.className}>{children}</body>
     </html>
   )
 }
